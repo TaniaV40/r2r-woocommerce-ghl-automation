@@ -33,9 +33,13 @@ app.post('/webhook/woocommerce-order', async (req: Request, res: Response) => {
   try {
     const order = req.body;
 
-    if (!order || !order.billing) {
-      console.warn('Received invalid or empty WooCommerce webhook payload.');
-      return res.status(400).json({ error: 'Invalid payload: missing order billing details' });
+    // Handle WooCommerce Webhook Ping Test during webhook creation/save
+    if (order && (order.webhook_id || !order.billing)) {
+      console.log('Received WooCommerce webhook ping test or non-order event.');
+      return res.status(200).json({
+        success: true,
+        message: 'WooCommerce webhook endpoint verified successfully'
+      });
     }
 
     const { email, phone, first_name, last_name } = order.billing;
@@ -43,7 +47,7 @@ app.post('/webhook/woocommerce-order', async (req: Request, res: Response) => {
 
     if (!email) {
       console.warn('Order missing billing email address. Skipping GHL contact upsert.');
-      return res.status(400).json({ error: 'Order missing billing email' });
+      return res.status(200).json({ message: 'Skipped: Order missing billing email' });
     }
 
     const fullName = `${first_name || ''} ${last_name || ''}`.trim();
