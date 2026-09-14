@@ -1,0 +1,129 @@
+{
+  "name": "R2R WooCommerce + GHL tag",
+  "nodes": [
+    {
+      "parameters": {
+        "event": "order.created"
+      },
+      "type": "n8n-nodes-base.wooCommerceTrigger",
+      "typeVersion": 1,
+      "position": [
+        -48,
+        0
+      ],
+      "id": "5c36790f-ca82-4e52-ab39-f7e752dfb517",
+      "name": "WooCommerce Trigger",
+      "webhookId": "a534f1a1-134c-4d76-b3a0-dbd8bac49ea9",
+      "credentials": {
+        "wooCommerceApi": {
+          "id": "sqpHUCK9umCoGwnL",
+          "name": "WooCommerce R2R Tennis"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://services.leadconnectorhq.com/contacts/upsert",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Version",
+              "value": "2021-04-15"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer pit-2a7c6e2d-533c-4e11-96ab-709c97a6ed07"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"locationId\": \"tn21zU0Kxi7Eu7ENTE7w\",\n  \"email\": \"{{ $('WooCommerce Trigger').first().json.billing.email }}\",\n  \"phone\": \"{{ $('WooCommerce Trigger').first().json.billing.phone }}\",\n  \"name\": \"{{ $('WooCommerce Trigger').first().json.billing.first_name }} {{ $('WooCommerce Trigger').first().json.billing.last_name }}\",\n  \"tags\": {{ JSON.stringify( $('Get a category').first().json.categories.map(c => c.name) ) }}\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        256,
+        0
+      ],
+      "id": "f0d647a8-34fc-483a-b7fe-fc11af6008c5",
+      "name": "Tag Contact in GHL"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "productId": "={{ $json.line_items[0].product_id }}"
+      },
+      "type": "n8n-nodes-base.wooCommerce",
+      "typeVersion": 1,
+      "position": [
+        96,
+        0
+      ],
+      "id": "b0a4ac2c-7b7f-46ac-a1ba-edd998c2749f",
+      "name": "Get a category",
+      "credentials": {
+        "wooCommerceApi": {
+          "id": "sqpHUCK9umCoGwnL",
+          "name": "WooCommerce R2R Tennis"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "WooCommerce Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get a category",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a category": {
+      "main": [
+        [
+          {
+            "node": "Tag Contact in GHL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false,
+    "errorWorkflow": "6ombG7OdasLHxEdj"
+  },
+  "versionId": "8e8b42b5-f0c1-49c0-a3b2-34e026d4e5c4",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "10eb605ac83ce9887f461325f742975a92c1a693efcbbf155f08a35627563804"
+  },
+  "id": "6ombG7OdasLHxEdj",
+  "tags": [
+    {
+      "updatedAt": "2026-01-19T09:39:27.816Z",
+      "createdAt": "2026-01-19T09:39:27.816Z",
+      "id": "8WjbrEPcey6TdhTq",
+      "name": "GHL"
+    },
+    {
+      "updatedAt": "2025-11-04T12:04:05.312Z",
+      "createdAt": "2025-11-04T12:04:05.312Z",
+      "id": "UGRZs8CdrekQ45HA",
+      "name": "R2R Tennis"
+    }
+  ]
+}
