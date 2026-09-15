@@ -29,6 +29,7 @@ export interface ProductDataInput {
 
 export interface OrderDataInput {
   id: number | string;
+  number?: string | number;
   date_created?: string;
   total?: string | number;
   billing?: {
@@ -42,6 +43,14 @@ export interface OrderDataInput {
 const has = (str: string, word: string): boolean =>
   str.toLowerCase().includes(word.toLowerCase());
 
+function formatDateCreated(dateStr?: string): string {
+  if (!dateStr) {
+    const now = new Date();
+    return now.toISOString().replace('T', ' ').substring(0, 19);
+  }
+  return dateStr.replace('T', ' ').replace(/Z.*$/, '').substring(0, 19);
+}
+
 /**
  * Parses WooCommerce order and product details into structured lesson metadata.
  */
@@ -49,6 +58,7 @@ export function parseOrderDetails(
   orderData: OrderDataInput,
   productData?: ProductDataInput
 ): ParsedOrderData {
+  const orderId = orderData.number ?? orderData.id;
   const productName = productData?.name || '';
   const cats = productData?.categories || [];
   const tags = productData?.tags || [];
@@ -132,8 +142,8 @@ export function parseOrderDetails(
   const customerName = `${firstName} ${lastName}`.trim();
 
   return {
-    order_id: orderData.id,
-    date_created: orderData.date_created || new Date().toISOString(),
+    order_id: orderId,
+    date_created: formatDateCreated(orderData.date_created),
     customer_name: customerName,
     customer_email: orderData.billing?.email || '',
     customer_phone: orderData.billing?.phone || '',
