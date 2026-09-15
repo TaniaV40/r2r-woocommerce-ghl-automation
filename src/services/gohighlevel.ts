@@ -1,9 +1,15 @@
+export interface GHLCustomField {
+  key: string;
+  field_value: string;
+}
+
 export interface GHLUpsertContactPayload {
   locationId: string;
   email: string;
   phone: string;
   name: string;
   tags: string[];
+  customFields?: GHLCustomField[];
 }
 
 export interface GHLUpsertResponse {
@@ -13,7 +19,7 @@ export interface GHLUpsertResponse {
 }
 
 /**
- * Upserts a contact in GoHighLevel (LeadConnector) with assigned category tags.
+ * Upserts a contact in GoHighLevel (LeadConnector) with assigned category tags and custom fields.
  */
 export async function upsertGHLContact(payload: GHLUpsertContactPayload): Promise<GHLUpsertResponse> {
   const apiKey = process.env.GHL_API_KEY;
