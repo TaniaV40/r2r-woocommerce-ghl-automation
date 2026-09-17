@@ -58,13 +58,16 @@ async function processWooCommerceWebhook(req: Request, res: Response) {
     if (lineItems.length > 0) {
       const firstProductId = lineItems[0].product_id;
       if (firstProductId) {
-        const fetchedProduct = await getProductDetails(firstProductId);
-        if (fetchedProduct) {
-          productDetails = fetchedProduct;
-        } else {
-          productDetails = {
-            name: lineItems[0].name || ''
-          };
+        try {
+          const fetchedProduct = await getProductDetails(firstProductId);
+          if (fetchedProduct) {
+            productDetails = fetchedProduct;
+          } else {
+            productDetails = { name: lineItems[0].name || '' };
+          }
+        } catch (wcErr: any) {
+          console.error('WooCommerce API lookup warning:', wcErr.message || wcErr);
+          productDetails = { name: lineItems[0].name || '' };
         }
       }
     }
@@ -91,17 +94,22 @@ async function processWooCommerceWebhook(req: Request, res: Response) {
       ]
     };
 
-    // Execute GHL contact upsert
+    // Execute GHL contact upsert safely
     let ghlResult = null;
     try {
       ghlResult = await upsertGHLContact(ghlPayload);
       console.log(`Successfully updated contact in GHL for ${parsedData.customer_email}`);
     } catch (ghlErr: any) {
-      console.error(`GHL Upsert warning: ${ghlErr.message}`);
+      console.error(`GHL Upsert warning:`, ghlErr.message || ghlErr);
     }
 
-    // Execute Google Sheets append
-    const sheetsAppended = await appendOrderToGoogleSheet(parsedData);
+    // Execute Google Sheets append safely
+    let sheetsAppended = false;
+    try {
+      sheetsAppended = await appendOrderToGoogleSheet(parsedData);
+    } catch (sheetsErr: any) {
+      console.error(`Google Sheets warning:`, sheetsErr.message || sheetsErr);
+    }
 
     return res.status(200).json({
       success: true,
