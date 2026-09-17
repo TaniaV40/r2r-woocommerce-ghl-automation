@@ -5,25 +5,25 @@ import { ParsedOrderData } from './parser';
  * Appends a parsed order row to the Google Sheet with correct column ordering.
  */
 export async function appendOrderToGoogleSheet(data: ParsedOrderData): Promise<boolean> {
-  const spreadsheetId = process.env.GOOGLE_SHEET_ID || '1iKNTgq7iLAyYDRAO6dOUn4H1Nso-N-wTrG-7btQYfOM';
-  const sheetName = process.env.GOOGLE_SHEET_NAME || 'Master Sheet';
-
-  const clientEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
-  let privateKey = process.env.GOOGLE_PRIVATE_KEY;
-
-  if (!clientEmail || !privateKey) {
-    console.warn('[Google Sheets] GOOGLE_SERVICE_ACCOUNT_EMAIL or GOOGLE_PRIVATE_KEY not configured. Skipping Google Sheets append.');
-    return false;
-  }
-
-  // Handle escaped quotes and newlines in environment variable
-  privateKey = privateKey.trim();
-  if ((privateKey.startsWith('"') && privateKey.endsWith('"')) || (privateKey.startsWith("'") && privateKey.endsWith("'"))) {
-    privateKey = privateKey.slice(1, -1);
-  }
-  privateKey = privateKey.replace(/\\n/g, '\n');
-
   try {
+    const spreadsheetId = process.env.GOOGLE_SHEET_ID || '1iKNTgq7iLAyYDRAO6dOUn4H1Nso-N-wTrG-7btQYfOM';
+    const sheetName = process.env.GOOGLE_SHEET_NAME || 'Master Sheet';
+
+    const clientEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
+    let privateKey = process.env.GOOGLE_PRIVATE_KEY;
+
+    if (!clientEmail || !privateKey) {
+      console.warn('[Google Sheets] GOOGLE_SERVICE_ACCOUNT_EMAIL or GOOGLE_PRIVATE_KEY not configured. Skipping Google Sheets append.');
+      return false;
+    }
+
+    // Handle escaped quotes and newlines in environment variable
+    privateKey = privateKey.trim();
+    if ((privateKey.startsWith('"') && privateKey.endsWith('"')) || (privateKey.startsWith("'") && privateKey.endsWith("'"))) {
+      privateKey = privateKey.slice(1, -1);
+    }
+    privateKey = privateKey.replace(/\\n/g, '\n');
+
     const auth = new google.auth.JWT({
       email: clientEmail,
       key: privateKey,
