@@ -23,6 +23,7 @@ app.get('/', (_req: Request, res: Response) => {
   res.json({
     service: 'WooCommerce -> GoHighLevel & Google Sheets Webhook Automation',
     status: 'running',
+    version: '1.0.1',
     endpoints: {
       health: '/health',
       webhook: '/webhook/woocommerce-order'
