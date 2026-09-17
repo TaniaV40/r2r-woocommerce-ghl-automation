@@ -27,25 +27,31 @@ export async function upsertGHLContact(payload: GHLUpsertContactPayload): Promis
   const url = 'https://services.leadconnectorhq.com/contacts/upsert';
 
   if (!apiKey) {
-    throw new Error('GHL_API_KEY environment variable is not configured.');
+    console.warn('[GHL] GHL_API_KEY environment variable is not configured. Skipping GHL contact upsert.');
+    return { message: 'Skipped: GHL_API_KEY missing' };
   }
 
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Version': version,
-      'Authorization': `Bearer ${apiKey}`
-    },
-    body: JSON.stringify(payload)
-  });
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Version': version,
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify(payload)
+    });
 
-  const responseData = await response.json();
+    const responseData = await response.json();
 
-  if (!response.ok) {
-    console.error(`GHL Upsert Error (${response.status}):`, JSON.stringify(responseData));
-    throw new Error(`Failed to upsert GHL contact: ${response.statusText}`);
+    if (!response.ok) {
+      console.error(`GHL Upsert Error (${response.status}):`, JSON.stringify(responseData));
+      return { message: `GHL Error: ${response.statusText}` };
+    }
+
+    return responseData as GHLUpsertResponse;
+  } catch (error: any) {
+    console.error('[GHL] Network/API Error during GHL contact upsert:', error.message || error);
+    return { message: `GHL Error: ${error.message}` };
   }
-
-  return responseData as GHLUpsertResponse;
 }
